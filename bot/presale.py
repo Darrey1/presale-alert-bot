@@ -6,8 +6,11 @@ from pprint import pprint
 from datetime import datetime
 from telegram import Bot
 import asyncio
+import os 
 
+file_path = os.path.dirname(__file__)
 
+img_path = os.path.join(file_path, "presale.png")
 TOKEN = "7311342048:AAFvXN29Dabf9wX0BSxOh3kMfdv_M1mzm6U"
 bot = Bot(token=TOKEN)
 CHAT_ID = -1002158724916
@@ -19,6 +22,15 @@ TELEGRAM_API_TOKEN = '7311342048:AAFvXN29Dabf9wX0BSxOh3kMfdv_M1mzm6U'
 abi =[{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":False,"inputs":[{"indexed":True,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":True,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"Customer","outputs":[{"internalType":"uint256","name":"tokensBought","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"buyTokens","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"buyTokensWithUSDT","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_usdtRate","type":"uint256"},{"internalType":"uint256","name":"_ethToUsd","type":"uint256"},{"internalType":"uint256","name":"divider","type":"uint256"},{"internalType":"uint256","name":"usdtDiv","type":"uint256"}],"name":"changeRate","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address payable","name":"_wallet","type":"address"}],"name":"changeWallet","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"checkPresaleEnd","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"checkPresaleStatus","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"checkbalance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"claimTokens","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"deposit","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"endPresale","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"ethDivider","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getClaimableTokens","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getDivider","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getETHPriceInUSD","outputs":[{"internalType":"int256","name":"","type":"int256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getTokenUsdPrice","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getUsdtDivider","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getUsdtRate","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"priceOracle","outputs":[{"internalType":"contract ChainlinkPriceOracle","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"progressETH","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"progressUSDT","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"soldTokens","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"startPresale","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"token","outputs":[{"internalType":"contract IERC20","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"tokenPriceUSD","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"usdt","outputs":[{"internalType":"contract IERC20","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"wallet","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"withdraw","outputs":[],"stateMutability":"nonpayable","type":"function"},{"stateMutability":"payable","type":"receive"}]
 web3 = Web3(Web3.HTTPProvider(rpc_url))
 contract = web3.eth.contract(address=ETH_WALLET, abi=abi)
+
+def get_amount_in_usd(amount_in_ether):
+    try:
+        usd = contract.functions.getETHPriceInUSD().call()
+        usd_amount = format(usd * amount_in_ether, '.4f')
+        return usd_amount
+    except Exception as e:
+        print(f"Error fetching USD price: {e}")
+        return None
 
 
 def get_time_and_status(hash):
@@ -36,7 +48,7 @@ def get_time_and_status(hash):
     return timestamp, status
 
 async def send_telegram_message(message):
-    await bot.send_photo(photo="/home/pythondev/projects/tnx_monitor/bot/presale.png",chat_id=CHAT_ID, caption=message,parse_mode="HTML")
+    await bot.send_photo(photo=img_path,chat_id=CHAT_ID, caption=message,parse_mode="HTML")
     
 
 async def monitor_wallet():
@@ -53,8 +65,10 @@ async def monitor_wallet():
         processed_txs = set()
     
     while True:
+        
         latest_block = web3.eth.block_number
         if latest_block > last_block:
+            latest_block = 20091906
             print(f'Processing block {latest_block}...')
             block = web3.eth.get_block(latest_block, full_transactions=True)
             
@@ -74,24 +88,23 @@ async def monitor_wallet():
                         timespan, status = get_time_and_status(tx_hash)
                         transaction_details['Timespan'] = timespan
                         transaction_details['status'] = status
+                        amount_usd = get_amount_in_usd(transaction_details['value'])
+                        print(amount_usd)
                         pprint(transaction_details)
                         message = f"""
   🚨 Alert 🚨   
                      
-🤖New Transaction Detected🤖
-#️⃣Hash: <code>{transaction_details['tnxHash']}</code>
-💌From: <code>{transaction_details['from']}</code>
-📩To: <code>{transaction_details['to']}</code>
-💰Amount: {transaction_details['value']} ETH
-👩‍💻Block Number: {transaction_details['blockNumber']}
-🌐Transaction Index: {transaction_details['transactionIndex']}
-🔗Method: {transaction_details['method']}
-🪪methodID: {transaction_details['methodID']}
-⌚Timestamp: {transaction_details['Timespan']}
-🚀Status: {transaction_details['status']}
+🤖<b>New Transaction Detected</b>🤖
+#️⃣<b>Hash:</b> <code>{transaction_details['tnxHash']}</code>
+💰<b>Amount:</b> <u>{transaction_details['value']} ETH</u>
+💰<b>Amount(USD):</b> <u>${amount_usd}</u>
+👩‍💻<b>Block Number:</b> {transaction_details['blockNumber']}
+🌐<b>Transaction Index:</b> {transaction_details['transactionIndex']}
+🔗<b>Method:</b> {transaction_details['method']}
+⌚<b>Timestamp:</b> {transaction_details['Timespan']}
+🚀<b>Status:</b> {transaction_details['status']}
 
-
-<a href="https://etherscan.io/tx/{tx_hash}">🔥View Transaction </a>|<a href="https://etherscan.io/address/{ETH_WALLET}">view Contract Info 🔥</a>
+<a href="https://etherscan.io/tx/{tx_hash}">🔥View Transaction 🔥</a>
 """
                         await send_telegram_message(message)
                         
