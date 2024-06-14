@@ -68,7 +68,6 @@ async def monitor_wallet():
         
         latest_block = web3.eth.block_number
         if latest_block > last_block:
-            latest_block = 20091906
             print(f'Processing block {latest_block}...')
             block = web3.eth.get_block(latest_block, full_transactions=True)
             
