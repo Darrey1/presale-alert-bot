@@ -74,7 +74,8 @@ async def monitor_wallet():
             for tx in block.transactions:
                 tx_hash = tx['hash'].hex()
                 if tx.to and str(tx.to).lower() == ETH_WALLET.lower():
-                    if tx_hash not in processed_txs:
+                    amount_usd = get_amount_in_usd(transaction_details['value'])
+                    if tx_hash not in processed_txs and int(amount_usd) == 50:
                         transaction_details['tnxHash'] = tx_hash
                         transaction_details['from'] = tx['from']
                         transaction_details['to'] = tx['to']
@@ -87,7 +88,7 @@ async def monitor_wallet():
                         timespan, status = get_time_and_status(tx_hash)
                         transaction_details['Timespan'] = timespan
                         transaction_details['status'] = status
-                        amount_usd = get_amount_in_usd(transaction_details['value'])
+                        # amount_usd = get_amount_in_usd(transaction_details['value'])
                         print(amount_usd)
                         pprint(transaction_details)
                         message = f"""
@@ -116,7 +117,7 @@ async def monitor_wallet():
             with open('processed_txs.txt', 'w') as f:
                 f.write('\n'.join(processed_txs))
         
-        time.sleep(10)
+        time.sleep(3)
 
 # Start monitoring the wallet
 asyncio.run(monitor_wallet())
