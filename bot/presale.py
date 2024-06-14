@@ -60,7 +60,7 @@ async def monitor_wallet():
             last_block = int(f.read().strip())
         with open('processed_txs.txt', 'r') as f:
             processed_txs = set(f.read().splitlines())
-    except FileNotFoundError:
+    except Exception as err:
         last_block = web3.eth.block_number
         processed_txs = set()
     
