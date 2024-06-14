@@ -119,6 +119,5 @@ async def monitor_wallet():
         
         time.sleep(3)
 
-# Start monitoring the wallet
-asyncio.run(monitor_wallet())
+
 
