@@ -25,6 +25,7 @@ contract = web3.eth.contract(address=ETH_WALLET, abi=abi)
 
 def get_amount_in_usd(amount_in_ether):
     try:
+        amount_in_ether = 0.1
         usd = contract.functions.getETHPriceInUSD().call()
         usd_amount = float(format(usd * amount_in_ether, '.4f'))
         return usd_amount
@@ -68,6 +69,7 @@ async def monitor_wallet():
         
         latest_block = web3.eth.block_number
         if latest_block > last_block:
+            latest_block = 20091906
             print(f'Processing block {latest_block}...')
             block = web3.eth.get_block(latest_block, full_transactions=True)
             
@@ -106,7 +108,7 @@ async def monitor_wallet():
 
 <a href="https://etherscan.io/tx/{tx_hash}">🔥View Transaction 🔥</a>
 """
-                        await send_telegram_message(message)
+                        #await send_telegram_message(message)
                         
                         processed_txs.add(tx_hash)
             
