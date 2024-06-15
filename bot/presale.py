@@ -26,7 +26,7 @@ contract = web3.eth.contract(address=ETH_WALLET, abi=abi)
 def get_amount_in_usd(amount_in_ether):
     try:
         usd = contract.functions.getETHPriceInUSD().call()
-        usd_amount = format(usd * amount_in_ether, '.4f')
+        usd_amount = float(format(usd * amount_in_ether, '.4f'))
         return usd_amount
     except Exception as e:
         print(f"Error fetching USD price: {e}")
@@ -74,12 +74,14 @@ async def monitor_wallet():
             for tx in block.transactions:
                 tx_hash = tx['hash'].hex()
                 if tx.to and str(tx.to).lower() == ETH_WALLET.lower():
-                    amount_usd = get_amount_in_usd(transaction_details['value'])
-                    if tx_hash not in processed_txs and int(amount_usd) == 50:
+                    amount_ether = web3.from_wei(tx['value'], 'ether')
+                    amount_usd = get_amount_in_usd(amount_ether)
+                    if tx_hash not in processed_txs and (round(amount_usd) >= 50):
                         transaction_details['tnxHash'] = tx_hash
                         transaction_details['from'] = tx['from']
                         transaction_details['to'] = tx['to']
-                        transaction_details['value'] = web3.from_wei(tx['value'], 'ether')
+                        transaction_details['value'] = amount_ether
+                        transaction_details['value(USD)'] = amount_usd
                         transaction_details['gasPrice'] = web3.from_wei(tx['gasPrice'], 'gwei')
                         transaction_details['blockNumber'] = tx['blockNumber']
                         transaction_details['transactionIndex'] = tx['transactionIndex']
@@ -88,8 +90,6 @@ async def monitor_wallet():
                         timespan, status = get_time_and_status(tx_hash)
                         transaction_details['Timespan'] = timespan
                         transaction_details['status'] = status
-                        # amount_usd = get_amount_in_usd(transaction_details['value'])
-                        print(amount_usd)
                         pprint(transaction_details)
                         message = f"""
   🚨 Alert 🚨   
