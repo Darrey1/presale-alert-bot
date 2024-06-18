@@ -13,9 +13,9 @@ file_path = os.path.dirname(__file__)
 img_path = os.path.join(file_path, "presale.png")
 TOKEN = "7311342048:AAFvXN29Dabf9wX0BSxOh3kMfdv_M1mzm6U"
 bot = Bot(token=TOKEN)
-CHAT_ID = -1002158724916
+CHAT_ID = -1002065184233
 # Load configurations from a config file or environment variables
-rpc_url = "https://ethereum-rpc.publicnode.com"
+rpc_url = "https://mainnet.infura.io/v3/bbba4fc3c0b7452ea2e46a6316da1321"
 ETH_WALLET = '0x55B4A5cA9C919D74713Dc6c46CC37140cc626Ee9'
 TELEGRAM_API_TOKEN = '7311342048:AAFvXN29Dabf9wX0BSxOh3kMfdv_M1mzm6U'
 # TELEGRAM_CHAT_ID = 'YOUR_TELEGRAM_CHAT_ID'
