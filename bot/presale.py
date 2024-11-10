@@ -16,7 +16,8 @@ bot = Bot(token=TOKEN)
 CHAT_ID = -1002065184233
 # Load configurations from a config file or environment variables
 # rpc_url = "https://mainnet.infura.io/v3/bbba4fc3c0b7452ea2e46a6316da1321"
-rpc_url = "https://mainnet.infura.io/v3/a9b0e64ceac743b18b916542909b95e3"
+# rpc_url = "https://mainnet.infura.io/v3/a9b0e64ceac743b18b916542909b95e3"
+rpc_url = "https://mainnet.infura.io/v3/0d40d75ddf71462baed759d33a94e649"
 ETH_WALLET = '0x55B4A5cA9C919D74713Dc6c46CC37140cc626Ee9'
 TELEGRAM_API_TOKEN = '7311342048:AAFvXN29Dabf9wX0BSxOh3kMfdv_M1mzm6U'
 # TELEGRAM_CHAT_ID = 'YOUR_TELEGRAM_CHAT_ID'
