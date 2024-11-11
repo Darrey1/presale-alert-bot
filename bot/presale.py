@@ -67,33 +67,33 @@ async def monitor_wallet():
         processed_txs = set()
     
     while True:
-        
-        latest_block = web3.eth.block_number
-        if latest_block > last_block:
-            print(f'Processing block {latest_block}...')
-            block = web3.eth.get_block(latest_block, full_transactions=True)
-            
-            for tx in block.transactions:
-                tx_hash = tx['hash'].hex()
-                if tx.to and str(tx.to).lower() == ETH_WALLET.lower():
-                    amount_ether = web3.from_wei(tx['value'], 'ether')
-                    amount_usd = get_amount_in_usd(amount_ether)
-                    if tx_hash not in processed_txs and (round(amount_usd) >= 50):
-                        transaction_details['tnxHash'] = tx_hash
-                        transaction_details['from'] = tx['from']
-                        transaction_details['to'] = tx['to']
-                        transaction_details['value'] = amount_ether
-                        transaction_details['value(USD)'] = amount_usd
-                        transaction_details['gasPrice'] = web3.from_wei(tx['gasPrice'], 'gwei')
-                        transaction_details['blockNumber'] = tx['blockNumber']
-                        transaction_details['transactionIndex'] = tx['transactionIndex']
-                        transaction_details['method'] = 'Buy Tokens'
-                        transaction_details['methodID'] = web3.keccak(text="buyTokens()").hex()[:10]
-                        timespan, status = get_time_and_status(tx_hash)
-                        transaction_details['Timespan'] = timespan
-                        transaction_details['status'] = status
-                        pprint(transaction_details)
-                        message = f"""
+        try:
+            latest_block = web3.eth.block_number
+            if latest_block > last_block:
+                print(f'Processing block {latest_block}...')
+                block = web3.eth.get_block(latest_block, full_transactions=True)
+
+                for tx in block.transactions:
+                    tx_hash = tx['hash'].hex()
+                    if tx.to and str(tx.to).lower() == ETH_WALLET.lower():
+                        amount_ether = web3.from_wei(tx['value'], 'ether')
+                        amount_usd = get_amount_in_usd(amount_ether)
+                        if tx_hash not in processed_txs and (round(amount_usd) >= 50):
+                            transaction_details['tnxHash'] = tx_hash
+                            transaction_details['from'] = tx['from']
+                            transaction_details['to'] = tx['to']
+                            transaction_details['value'] = amount_ether
+                            transaction_details['value(USD)'] = amount_usd
+                            transaction_details['gasPrice'] = web3.from_wei(tx['gasPrice'], 'gwei')
+                            transaction_details['blockNumber'] = tx['blockNumber']
+                            transaction_details['transactionIndex'] = tx['transactionIndex']
+                            transaction_details['method'] = 'Buy Tokens'
+                            transaction_details['methodID'] = web3.keccak(text="buyTokens()").hex()[:10]
+                            timespan, status = get_time_and_status(tx_hash)
+                            transaction_details['Timespan'] = timespan
+                            transaction_details['status'] = status
+                            pprint(transaction_details)
+                            message = f"""
   🚨 Alert 🚨   
                      
 🤖<b>New Transaction Detected</b>🤖
@@ -108,18 +108,22 @@ async def monitor_wallet():
 
 <a href="https://etherscan.io/tx/{tx_hash}">🔥View Transaction 🔥</a>
 """
-                        await send_telegram_message(message)
-                        
-                        processed_txs.add(tx_hash)
+                            await send_telegram_message(message)
+                            
+                            processed_txs.add(tx_hash)
+                
+                # Update the last processed block number
+                last_block = latest_block
+                with open('last_block.txt', 'w') as f:
+                    f.write(str(last_block))
+                with open('processed_txs.txt', 'w') as f:
+                    f.write('\n'.join(processed_txs))
             
-            # Update the last processed block number
-            last_block = latest_block
-            with open('last_block.txt', 'w') as f:
-                f.write(str(last_block))
-            with open('processed_txs.txt', 'w') as f:
-                f.write('\n'.join(processed_txs))
-        
-        time.sleep(3)
+            time.sleep(3)
+        except Exception as e:
+            print(f"Error monitoring wallet: {e}")
+            time.sleep(3)
+            continue
 
 
 
